@@ -4,33 +4,17 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"github.com/blendle/zapdriver"
+	"github.com/einride/spanner-backup-service/internal/handler"
 	"github.com/kelseyhightower/envconfig"
 	"go.uber.org/zap"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-type Server struct {
-	config      Config
-	adminClient *database.DatabaseAdminClient
-	logger      *zap.Logger
-}
-
-// Config represents the specific configuration of this service.
-type Config struct {
-	Project   string
-	Instance  string
-	Database  string
-	Frequency string
-}
 
 func main() {
 	ctx := context.Background()
-	var config Config
+	var config handler.Config
 	if err := envconfig.Process("config", &config); err != nil {
 		log.Panic(err)
 	}
@@ -47,54 +31,12 @@ func main() {
 		)
 	}
 	defer cleanup()
-	server := &Server{
-		config:      config,
-		adminClient: adminClient,
-		logger:      logger,
+	server := &handler.Server{
+		AdminClient: adminClient,
+		Logger:      logger,
 	}
-	http.HandleFunc("/", server.handler)
+	http.HandleFunc("/", server.ServeHTTP)
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
-	var expireTime time.Time
-	// Match retention to the backup frequency
-	switch s.config.Frequency {
-	case "daily":
-		expireTime = time.Now().AddDate(0, 0, 14)
-	case "weekly":
-		expireTime = time.Now().AddDate(0, 2, 0)
-	case "monthly":
-		expireTime = time.Now().AddDate(1, 0, 0)
-	default:
-		s.logger.Error(
-			"Unsupported backup frequency",
-			zap.String("frequency", s.config.Frequency),
-			zap.String("allowed", "daily, weekly, monthly"),
-		)
-		http.Error(w, "Unsupported backup frequency. Allowed: daily, weekly, monthly", http.StatusBadRequest)
-		return
-	}
-
-	req := adminpb.CreateBackupRequest{
-		Parent:   "projects/" + s.config.Project + "/instances/" + s.config.Instance,
-		BackupId: "auto-backup-" + s.config.Database + "-" + time.Now().Format("2006-01-02"),
-		Backup: &adminpb.Backup{
-			Database:    "projects/" + s.config.Project + "/instances/" + s.config.Instance + "/databases/" + s.config.Database,
-			ExpireTime:  timestamppb.New(expireTime),
-			VersionTime: timestamppb.Now(),
-		},
-	}
-	if _, err := s.adminClient.CreateBackup(r.Context(), &req); err != nil {
-		s.logger.Error(
-			"Error when creating backup",
-			zap.String("request", req.String()),
-			zap.Error(err),
-		)
-		http.Error(w, "Error when creating backup", 400)
-		return
-	}
-	s.logger.Info("Started backing up database...")
 }
 
 // initLogger initiates a new zap logger that conforms to the JSON structure for Cloud Logging.
