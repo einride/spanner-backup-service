@@ -1,4 +1,3 @@
-
 goreview_cwd := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 goreview_version := 0.14.0
 goreview := $(goreview_cwd)/$(goreview_version)/goreview
