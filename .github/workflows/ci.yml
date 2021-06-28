@@ -59,4 +59,4 @@ jobs:
 
       - name: Publish
         if: github.event_name == 'push'
-        run: ko publish ./cmd/server/ -t ${{ steps.release.outputs.TAG_NAME }} --bare
+        run: ko publish . -t ${{ steps.release.outputs.TAG_NAME }} --bare
