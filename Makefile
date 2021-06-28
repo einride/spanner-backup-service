@@ -1,12 +1,13 @@
+SHELL := /bin/bash
+
 .PHONY: all
 all: \
-	go-lint \
-	go-review \
 	go-test \
 	go-mod-tidy \
 
 include ./tools/golangci-lint/rules.mk
 include ./tools/goreview/rules.mk
+include ./tools/semantic-release/rules.mk
 
 
 .PHONY: go-mod-tidy
