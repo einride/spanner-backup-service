@@ -65,6 +65,7 @@ func TestHandler(t *testing.T) {
 					err: tc.BackupErr,
 				},
 			}
+			//nolint: noctx
 			req, err := http.NewRequest("POST", "/", bytes.NewBuffer(tc.Body))
 			assert.NilError(t, err)
 			rr := httptest.NewRecorder()
@@ -81,7 +82,11 @@ type adminClientMock struct {
 	err                  error
 }
 
-func (m *adminClientMock) CreateBackup(_ context.Context, req *adminpb.CreateBackupRequest, _ ...gax.CallOption) (*database.CreateBackupOperation, error) {
+func (m *adminClientMock) CreateBackup(
+	_ context.Context,
+	req *adminpb.CreateBackupRequest,
+	_ ...gax.CallOption,
+) (*database.CreateBackupOperation, error) {
 	m.createBackupRequest = req
 	if m.err != nil {
 		return nil, m.err

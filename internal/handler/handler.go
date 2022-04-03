@@ -15,7 +15,11 @@ import (
 )
 
 type adminClient interface {
-	CreateBackup(ctx context.Context, req *adminpb.CreateBackupRequest, opts ...gax.CallOption) (*database.CreateBackupOperation, error)
+	CreateBackup(
+		ctx context.Context,
+		req *adminpb.CreateBackupRequest,
+		opts ...gax.CallOption,
+	) (*database.CreateBackupOperation, error)
 }
 
 type Server struct {
@@ -44,7 +48,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var project, instance, database string
-	if err := resourcename.Sscan(config.Database, "projects/{project}/instances/{instance}/databases/{database}", &project, &instance, &database); err != nil {
+	if err := resourcename.Sscan(
+		config.Database,
+		"projects/{project}/instances/{instance}/databases/{database}",
+		&project,
+		&instance,
+		&database,
+	); err != nil {
 		http.Error(w, "Invalid database name.", http.StatusBadRequest)
 		return
 	}
