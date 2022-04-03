@@ -36,7 +36,7 @@ func main() {
 		Logger:      logger,
 	}
 	http.HandleFunc("/", server.ServeHTTP)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Panic(http.ListenAndServe(":8080", nil))
 }
 
 // initLogger initiates a new zap logger that conforms to the JSON structure for Cloud Logging.
@@ -47,7 +47,8 @@ func initLogger() (logger *zap.Logger, cleanup func(), err error) {
 		zapdriver.WrapCore(
 			zapdriver.ServiceName("spanner-auto-backup"),
 			zapdriver.ReportAllErrors(true),
-		)}
+		),
+	}
 	logger, err = zapConfig.Build(zapOptions...)
 	if err != nil {
 		return nil, nil, err
@@ -63,8 +64,12 @@ func initLogger() (logger *zap.Logger, cleanup func(), err error) {
 	return logger, cleanup, nil
 }
 
-// initAdminClient initiates a new DatabaseAdminClient which can be used to perform operations on a Cloud Spanner Database.
-func initAdminClient(ctx context.Context, logger *zap.Logger) (adminClient *database.DatabaseAdminClient, cleanup func(), err error) {
+// initAdminClient initiates a new DatabaseAdminClient
+// which can be used to perform operations on a Cloud Spanner Database.
+func initAdminClient(
+	ctx context.Context,
+	logger *zap.Logger,
+) (adminClient *database.DatabaseAdminClient, cleanup func(), err error) {
 	adminClient, err = database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return nil, nil, err

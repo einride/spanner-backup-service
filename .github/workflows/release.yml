@@ -1,0 +1,35 @@
+name: release
+
+on:
+  push:
+    branches: [master]
+
+permissions: write-all
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Sage
+        uses: einride/sage/actions/setup@master
+
+      - name: Log in to GitHub Container registry
+        uses: docker/login-action@v1.14.1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make
+        run: make
+
+      - name: Release
+        id: release
+        uses: go-semantic-release/action@v1.17
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          allow-initial-development-versions: true
+
+      - name: Publish
+        if: steps.release.outputs.version != ''
+        run: make ko-build repo=ghcr.io/${{ github.repository }} tag=v${{ steps.release.outputs.version }}
