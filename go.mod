@@ -6,11 +6,11 @@ require (
 	cloud.google.com/go/spanner v1.31.0
 	github.com/blendle/zapdriver v1.3.1
 	github.com/google/wire v0.5.0
-	github.com/googleapis/gax-go/v2 v2.2.0
+	github.com/googleapis/gax-go/v2 v2.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	go.einride.tech/aip v0.54.1
 	go.uber.org/zap v1.21.0
-	google.golang.org/genproto v0.0.0-20220401170504-314d38edb7de
+	google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac
 	google.golang.org/protobuf v1.28.0
 	gotest.tools/v3 v3.1.0
 )
