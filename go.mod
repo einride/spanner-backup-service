@@ -12,7 +12,7 @@ require (
 	go.uber.org/zap v1.21.0
 	google.golang.org/genproto v0.0.0-20220616135557-88e70c0c3a90
 	google.golang.org/protobuf v1.28.0
-	gotest.tools/v3 v3.2.0
+	gotest.tools/v3 v3.3.0
 )
 
 require (
